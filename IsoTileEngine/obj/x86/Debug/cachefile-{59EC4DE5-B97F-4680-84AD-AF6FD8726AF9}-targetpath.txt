@@ -1,0 +1,8 @@
+Content\Fonts\pericles6.xnb
+Content\Fonts\pericles15.xnb
+Content\Textures\fogofwar.xnb
+Content\Textures\hilight.xnb
+Content\Textures\Tilesets\tileset.xnb
+Content\Textures\Characters\player.xnb
+Content\Textures\Tilesets\mousemap.xnb
+Content\Textures\Tilesets\slopemap.xnb
