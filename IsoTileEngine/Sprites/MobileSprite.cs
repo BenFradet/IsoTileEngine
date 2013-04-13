@@ -14,6 +14,7 @@ namespace IsoTileEngine.Sprites
         Queue<Vector2> path;
         Vector2 currentTarget;
         Vector2 nullTarget;
+        float speed = 3.0f;
 
         #region Constructors
         public MobileSprite(Texture2D texture, TileMap map)
@@ -33,9 +34,12 @@ namespace IsoTileEngine.Sprites
             {
                 currentTarget = path.Dequeue();
             }
-            else if (currentTarget != Position && currentTarget != nullTarget)
+            else if (map.GetCellAtWorldPoint(currentTarget) != map.GetCellAtWorldPoint(Position) && currentTarget != nullTarget)
             {
-                sprite.Move((int)FindBestMove(GetPossibleMoves(Position)).X, (int)FindBestMove(GetPossibleMoves(Position)).Y);
+                Vector2 move = FindBestMove(GetPossibleMoves(Position));
+                move.Normalize();
+                move *= speed;
+                Position += move;
             }
 
             sprite.Update(gameTime);
@@ -132,6 +136,18 @@ namespace IsoTileEngine.Sprites
         {
             get { return sprite.Position; }
             set { sprite.Position = value; }
+        }
+
+        public float Speed
+        {
+            get { return speed; }
+            set
+            {
+                if (value < 0.0f)
+                    speed = 0.0f;
+                else
+                    speed = value;
+            }
         }
 
         /*public int HorizontalCollisionBuffer

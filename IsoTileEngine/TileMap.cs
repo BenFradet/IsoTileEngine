@@ -104,7 +104,11 @@ namespace IsoTileEngine
             Rows[16].Columns[6].AddToperTile(94);
 
             Rows[15].Columns[5].Walkable = false;
+            Rows[15].Columns[6].Walkable = false;
+            Rows[16].Columns[5].Walkable = false;
             Rows[16].Columns[6].Walkable = false;
+            Rows[17].Columns[5].Walkable = false;
+            Rows[17].Columns[6].Walkable = false;
 
             Rows[12].Columns[9].AddHeightTile(34);
             Rows[11].Columns[9].AddHeightTile(34);
@@ -150,23 +154,20 @@ namespace IsoTileEngine
                     localPointX += mouseMap.Width / 2;
                     localPointY += mouseMap.Height / 2;
                 }
-
-                if (uints[0] == 0xFF00FF00)
+                else if (uints[0] == 0xFF00FF00)
                 {
                     dx = -1;
                     localPointX += mouseMap.Width / 2;
                     dy = 1;
                     localPointY -= mouseMap.Height / 2;
                 }
-
-                if (uints[0] == 0xFF00FFFF)
+                else if (uints[0] == 0xFF00FFFF)
                 {
                     dy = -1;
                     localPointX -= mouseMap.Width / 2;
                     localPointY += mouseMap.Height / 2;
                 }
-
-                if (uints[0] == 0xFFFF0000)
+                else if (uints[0] == 0xFFFF0000)
                 {
                     dy = 1;
                     localPointX -= mouseMap.Width / 2;

@@ -204,7 +204,7 @@ namespace IsoTileEngine
                 coordinates = !coordinates;
 
             if (currentMouseState.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released)
-                player.AddPathNode(Camera.ScreenToWorld(new Vector2(currentMouseState.X, currentMouseState.Y)));
+                player.AddPathNode(Camera.ScreenToWorld(new Vector2((int)currentMouseState.X, (int)currentMouseState.Y)));
 
             UpdateFogOfWar();
 
