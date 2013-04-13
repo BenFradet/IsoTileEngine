@@ -10,83 +10,40 @@ namespace IsoTileEngine.Sprites
     class MobileSprite
     {
         SpriteAnimation sprite;
+        TileMap map;
         Queue<Vector2> path;
-        Vector2 target;
-        float speed = 1.0f;
-        int collisionBufferX = 0;
-        int collisionBufferY = 0;
-        bool active = true;
-        bool movingTowardsTarget = true;
-        bool pathing = true;
-        bool loopPath = true;
-        bool collidable = true;
-        bool visible = true;
-        bool deactivateAtEndOfPath = false;
-        bool hideAtEndOfPath = false;
-        string endPathAnimation;
+        Vector2 currentTarget;
+        Vector2 nullTarget;
 
         #region Constructors
-        public MobileSprite(Texture2D texture)
+        public MobileSprite(Texture2D texture, TileMap map)
         {
             sprite = new SpriteAnimation(texture);
+            this.map = map;
             path = new Queue<Vector2>();
-            endPathAnimation = null;
+            currentTarget = new Vector2(-1, -1);
+            nullTarget = new Vector2(-1, -1);
         }
         #endregion
 
         #region Methods
         public void Update(GameTime gameTime)
         {
-            if (active && movingTowardsTarget)
+            if (path.Count > 0 && map.GetCellAtWorldPoint(currentTarget) != map.GetCellAtWorldPoint(Position))
             {
-                if (target != null)
-                {
-                    Vector2 delta = new Vector2(target.X - sprite.X, target.Y - sprite.Y);
-                    if (delta.Length() > speed)
-                    {
-                        delta.Normalize();
-                        delta *= speed;
-                        Position += delta;
-                    }
-                    else
-                    {
-                        if (target == Position)
-                        {
-                            if (pathing)
-                            {
-                                if (path.Count > 0)
-                                {
-                                    target = path.Dequeue();
-                                    if (loopPath)
-                                        path.Enqueue(target);
-                                }
-                                else
-                                {
-                                    if (endPathAnimation != null)
-                                    {
-                                        if (sprite.CurrentAnimation != endPathAnimation)
-                                            sprite.CurrentAnimation = endPathAnimation;
-                                    }
-                                    if (deactivateAtEndOfPath)
-                                        active = false;
-                                    if (hideAtEndOfPath)
-                                        visible = false;
-                                }
-                            }
-                        }
-                        else
-                            Position = target;
-                    }
-                }
+                currentTarget = path.Dequeue();
             }
-            if (active)
-                sprite.Update(gameTime);
+            else if (currentTarget != Position && currentTarget != nullTarget)
+            {
+                sprite.Move((int)FindBestMove(GetPossibleMoves(Position)).X, (int)FindBestMove(GetPossibleMoves(Position)).Y);
+            }
+
+            sprite.Update(gameTime);
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, int xOffset, int yOffset)
         {
-            if (visible)
-                sprite.Draw(spriteBatch, 0, 0);
+            sprite.Draw(spriteBatch, xOffset, yOffset);
         }
 
         public void AddPathNode(Vector2 node)
@@ -103,6 +60,66 @@ namespace IsoTileEngine.Sprites
         {
             path.Clear();
         }
+
+        private List<Vector2> GetPossibleMoves(Vector2 position)
+        {
+            List<Vector2> possibleMoves = new List<Vector2>();
+            Point currentCell = map.WorldToMapCell(position);
+
+            if (currentCell.Y % 2 == 0)
+            {
+                if (currentCell.X >= 1 && currentCell.Y >= 1 && map.Rows[currentCell.X - 1].Columns[currentCell.Y - 1].Walkable)
+                    possibleMoves.Add(new Vector2(-Tile.TileStepX / 2f, -Tile.TileStepY / 2f));
+                if (currentCell.X >= 1 && map.Rows[currentCell.X - 1].Columns[currentCell.Y].Walkable)
+                    possibleMoves.Add(new Vector2(-Tile.TileStepX, 0));
+                if (currentCell.X >= 1 && currentCell.Y < map.MapHeight && map.Rows[currentCell.X - 1].Columns[currentCell.Y + 1].Walkable)
+                    possibleMoves.Add(new Vector2(-Tile.TileStepX / 2f, Tile.TileStepY / 2f));
+                if (currentCell.Y > 1 && map.Rows[currentCell.X].Columns[currentCell.Y - 2].Walkable)
+                    possibleMoves.Add(new Vector2(0, -Tile.TileStepY));
+                if (currentCell.Y >= 1 && map.Rows[currentCell.X].Columns[currentCell.Y - 1].Walkable)
+                    possibleMoves.Add(new Vector2(Tile.TileStepX / 2f, -Tile.TileStepY / 2f));
+                if (currentCell.Y < map.MapHeight && map.Rows[currentCell.X].Columns[currentCell.Y + 1].Walkable)
+                    possibleMoves.Add(new Vector2(Tile.TileStepX / 2f, Tile.TileStepY / 2f));
+                if (currentCell.Y < map.MapHeight - 1 && map.Rows[currentCell.X].Columns[currentCell.Y + 2].Walkable)
+                    possibleMoves.Add(new Vector2(0, Tile.TileStepY));
+                if (currentCell.X < map.MapWidth && map.Rows[currentCell.X + 1].Columns[currentCell.Y].Walkable)
+                    possibleMoves.Add(new Vector2(Tile.TileStepX, 0));
+            }
+            else
+            {
+                if (currentCell.X >= 1 && map.Rows[currentCell.X - 1].Columns[currentCell.Y].Walkable)
+                    possibleMoves.Add(new Vector2(-Tile.TileStepX, 0));
+                if (currentCell.Y > 1 && map.Rows[currentCell.X].Columns[currentCell.Y - 2].Walkable)
+                    possibleMoves.Add(new Vector2(0, -Tile.TileStepY));
+                if (currentCell.Y >= 1 && map.Rows[currentCell.X].Columns[currentCell.Y - 1].Walkable)
+                    possibleMoves.Add(new Vector2(-Tile.TileStepX / 2f, -Tile.TileStepY / 2f));
+                if (currentCell.Y < map.MapHeight && map.Rows[currentCell.X].Columns[currentCell.Y + 1].Walkable)
+                    possibleMoves.Add(new Vector2(-Tile.TileStepX / 2f, Tile.TileStepY / 2f));
+                if (currentCell.Y < map.MapHeight - 1 && map.Rows[currentCell.X].Columns[currentCell.Y + 2].Walkable)
+                    possibleMoves.Add(new Vector2(0, Tile.TileStepY));
+                if (currentCell.X < map.MapWidth && currentCell.Y >= 1 && map.Rows[currentCell.X + 1].Columns[currentCell.Y - 1].Walkable)
+                    possibleMoves.Add(new Vector2(Tile.TileStepX / 2f, -Tile.TileStepY / 2f));
+                if (currentCell.X < map.MapWidth && map.Rows[currentCell.X + 1].Columns[currentCell.Y].Walkable)
+                    possibleMoves.Add(new Vector2(Tile.TileStepX, 0));
+                if (currentCell.X < map.MapWidth && currentCell.Y < map.MapHeight && map.Rows[currentCell.X + 1].Columns[currentCell.Y + 1].Walkable)
+                    possibleMoves.Add(new Vector2(Tile.TileStepX / 2f, Tile.TileStepY / 2f));
+            }
+
+            return possibleMoves;
+        }
+
+        private Vector2 FindBestMove(List<Vector2> moves)
+        {
+            List<float> deltas = new List<float>();
+            foreach(Vector2 vec in moves)
+            {
+                float dx = currentTarget.X - (Position.X + vec.X);
+                float dy = currentTarget.Y - (Position.Y + vec.Y);
+                deltas.Add((float)Math.Sqrt(dx * dx + dy * dy));
+            }
+
+            return moves[deltas.IndexOf(deltas.Min())];
+        }
         #endregion
 
         #region Properties
@@ -117,13 +134,7 @@ namespace IsoTileEngine.Sprites
             set { sprite.Position = value; }
         }
 
-        public Vector2 Target
-        {
-            get { return target; }
-            set { target = value; }
-        }
-
-        public int HorizontalCollisionBuffer
+        /*public int HorizontalCollisionBuffer
         {
             get { return collisionBufferX; }
             set { collisionBufferX = value; }
@@ -133,66 +144,11 @@ namespace IsoTileEngine.Sprites
         {
             get { return collisionBufferY; }
             set { collisionBufferY = value; }
-        }
-
-        public bool IsPathing
-        {
-            get { return pathing; }
-            set { pathing = value; }
-        }
-
-        public bool DeactivateAfterPathing
-        {
-            get { return deactivateAtEndOfPath; }
-            set { deactivateAtEndOfPath = value; }
-        }
-
-        public bool LoopPath
-        {
-            get { return loopPath; }
-            set { loopPath = value; }
-        }
-
-        public string EndPathAnimation
-        {
-            get { return endPathAnimation; }
-            set { endPathAnimation = value; }
-        }
-
-        public bool HideAtEndOfPath
-        {
-            get { return hideAtEndOfPath; }
-            set { hideAtEndOfPath = value; }
-        }
-
-        public bool IsVisible
-        {
-            get { return visible; }
-            set { visible = true; }
-        }
-
-        public float Speed
-        {
-            get { return speed; }
-            set { speed = value; }
-        }
-
-        public bool IsActive
-        {
-            get { return active; }
-            set { active = value; }
-        }
+        }*/
 
         public bool IsMoving
         {
-            get { return movingTowardsTarget; }
-            set { movingTowardsTarget = value; }
-        }
-
-        public bool IsCollidable
-        {
-            get { return collidable; }
-            set { collidable = value; }
+            get { return path.Count > 0; }
         }
 
         public Rectangle BoundingBox
@@ -200,13 +156,13 @@ namespace IsoTileEngine.Sprites
             get { return sprite.BoundingBox; }
         }
 
-        public Rectangle CollisionBox
+        /*public Rectangle CollisionBox
         {
             get
             {
                 return new Rectangle(sprite.BoundingBox.X + collisionBufferX, sprite.BoundingBox.Y + collisionBufferY, sprite.Width - 2 * collisionBufferX, sprite.Height - 2 * collisionBufferY);
             }
-        }
+        }*/
         #endregion
     }
 }

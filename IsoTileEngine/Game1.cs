@@ -33,7 +33,7 @@ namespace IsoTileEngine
 
         bool coordinates = false;
 
-        SpriteAnimation player;
+        MobileSprite player;
 
         Texture2D fogOfWar;
         Texture2D hilight;
@@ -66,30 +66,30 @@ namespace IsoTileEngine
             fogOfWar = Content.Load<Texture2D>("Textures/fogofwar");
             hilight = Content.Load<Texture2D>("Textures/hilight");
 
-            player = new SpriteAnimation(Content.Load<Texture2D>("Textures/Characters/player"));
+            player = new MobileSprite(Content.Load<Texture2D>("Textures/Characters/player"), map);
 
-            player.AddAnimation("walkEast", 0, 0, 48, 48, 8, 0.1f);
-            player.AddAnimation("walkNorth", 0, 48, 48, 48, 8, 0.1f);
-            player.AddAnimation("walkNorthEast", 0, 48 * 2, 48, 48, 8, 0.1f);
-            player.AddAnimation("walkNorthWest", 0, 48 * 3, 48, 48, 8, 0.1f);
-            player.AddAnimation("walkSouth", 0, 48 * 4, 48, 48, 8, 0.1f);
-            player.AddAnimation("walkSouthEast", 0, 48 * 5, 48, 48, 8, 0.1f);
-            player.AddAnimation("walkSouthWest", 0, 48 * 6, 48, 48, 8, 0.1f);
-            player.AddAnimation("walkWest", 0, 48 * 7, 48, 48, 8, 0.1f);
+            player.Sprite.AddAnimation("walkEast", 0, 0, 48, 48, 8, 0.1f);
+            player.Sprite.AddAnimation("walkNorth", 0, 48, 48, 48, 8, 0.1f);
+            player.Sprite.AddAnimation("walkNorthEast", 0, 48 * 2, 48, 48, 8, 0.1f);
+            player.Sprite.AddAnimation("walkNorthWest", 0, 48 * 3, 48, 48, 8, 0.1f);
+            player.Sprite.AddAnimation("walkSouth", 0, 48 * 4, 48, 48, 8, 0.1f);
+            player.Sprite.AddAnimation("walkSouthEast", 0, 48 * 5, 48, 48, 8, 0.1f);
+            player.Sprite.AddAnimation("walkSouthWest", 0, 48 * 6, 48, 48, 8, 0.1f);
+            player.Sprite.AddAnimation("walkWest", 0, 48 * 7, 48, 48, 8, 0.1f);
 
-            player.AddAnimation("idleEast", 0, 0, 48, 48, 1, 0.2f);
-            player.AddAnimation("idleNorth", 0, 48, 48, 48, 1, 0.2f);
-            player.AddAnimation("idleNorthEast", 0, 48 * 2, 48, 48, 1, 0.2f);
-            player.AddAnimation("idleNorthWest", 0, 48 * 3, 48, 48, 1, 0.2f);
-            player.AddAnimation("idleSouth", 0, 48 * 4, 48, 48, 1, 0.2f);
-            player.AddAnimation("idleSouthEast", 0, 48 * 5, 48, 48, 1, 0.2f);
-            player.AddAnimation("idleSouthWest", 0, 48 * 6, 48, 48, 1, 0.2f);
-            player.AddAnimation("idleWest", 0, 48 * 7, 48, 48, 1, 0.2f);
+            player.Sprite.AddAnimation("idleEast", 0, 0, 48, 48, 1, 0.2f);
+            player.Sprite.AddAnimation("idleNorth", 0, 48, 48, 48, 1, 0.2f);
+            player.Sprite.AddAnimation("idleNorthEast", 0, 48 * 2, 48, 48, 1, 0.2f);
+            player.Sprite.AddAnimation("idleNorthWest", 0, 48 * 3, 48, 48, 1, 0.2f);
+            player.Sprite.AddAnimation("idleSouth", 0, 48 * 4, 48, 48, 1, 0.2f);
+            player.Sprite.AddAnimation("idleSouthEast", 0, 48 * 5, 48, 48, 1, 0.2f);
+            player.Sprite.AddAnimation("idleSouthWest", 0, 48 * 6, 48, 48, 1, 0.2f);
+            player.Sprite.AddAnimation("idleWest", 0, 48 * 7, 48, 48, 1, 0.2f);
 
             player.Position = new Vector2(100, 100);
-            player.DrawOffset = new Vector2(-24, -38);
-            player.CurrentAnimation = "walkEast";
-            player.IsAnimating = true;
+            player.Sprite.DrawOffset = new Vector2(-24, -38);
+            player.Sprite.CurrentAnimation = "walkEast";
+            player.Sprite.IsAnimating = true;
 
             pericles15 = Content.Load<SpriteFont>("Fonts/pericles15");
             pericles6 = Content.Load<SpriteFont>("Fonts/pericles6");
@@ -98,6 +98,7 @@ namespace IsoTileEngine
             previousKeyboardState = new KeyboardState();
 
             currentMouseState = new MouseState();
+            previousMouseState = new MouseState();
 
             Camera.ViewWidth = this.graphics.PreferredBackBufferWidth;
             Camera.ViewHeight = this.graphics.PreferredBackBufferHeight;
@@ -176,15 +177,15 @@ namespace IsoTileEngine
 
             if (moveDir.Length() != 0)
             {
-                player.Move((int)moveDir.X, (int)moveDir.Y);
-                if (player.CurrentAnimation != animation)
-                    player.CurrentAnimation = animation;
+                player.Sprite.Move((int)moveDir.X, (int)moveDir.Y);
+                if (player.Sprite.CurrentAnimation != animation)
+                    player.Sprite.CurrentAnimation = animation;
             }
             else
-                player.CurrentAnimation = "idle" + player.CurrentAnimation.Substring(4);
+                player.Sprite.CurrentAnimation = "idle" + player.Sprite.CurrentAnimation.Substring(4);
 
-            float playerX = MathHelper.Clamp(player.Position.X, player.DrawOffset.X, Camera.WorldWidth);
-            float playerY = MathHelper.Clamp(player.Position.Y, player.DrawOffset.Y, Camera.WorldHeight);
+            float playerX = MathHelper.Clamp(player.Position.X, player.Sprite.DrawOffset.X, Camera.WorldWidth);
+            float playerY = MathHelper.Clamp(player.Position.Y, player.Sprite.DrawOffset.Y, Camera.WorldHeight);
             player.Position = new Vector2(playerX, playerY);
 
             Vector2 testPosition = Camera.WorldToScreen(player.Position);
@@ -202,9 +203,13 @@ namespace IsoTileEngine
             if (currentKeyboardState.IsKeyDown(Keys.C) && !previousKeyboardState.IsKeyDown(Keys.C))
                 coordinates = !coordinates;
 
+            if (currentMouseState.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released)
+                player.AddPathNode(Camera.ScreenToWorld(new Vector2(currentMouseState.X, currentMouseState.Y)));
+
             UpdateFogOfWar();
 
             previousKeyboardState = currentKeyboardState;
+            previousMouseState = currentMouseState;
 
             base.Update(gameTime);
         }
@@ -338,7 +343,7 @@ namespace IsoTileEngine
                                 Color.White, 0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
 
                     if (mapX == playerMapPoint.X && mapY == playerMapPoint.Y)
-                        player.DrawDepth = depthOffset - (float)(heightRow + 2) * heightRowDepthMod;
+                        player.Sprite.DrawDepth = depthOffset - (float)(heightRow + 2) * heightRowDepthMod;
                 }
             }
 

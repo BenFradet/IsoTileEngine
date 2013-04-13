@@ -177,7 +177,14 @@ namespace IsoTileEngine
             mapCell.Y += dy - 2;
 
             localPoint = new Point(localPointX, localPointY);
-
+            if (mapCell.Y < 0)
+                mapCell.Y = 0;
+            if (mapCell.X < 0)
+                mapCell.X = 0;
+            if (mapCell.Y > MapHeight)
+                mapCell.Y = MapHeight;
+            if (mapCell.X > MapWidth)
+                mapCell.X = MapWidth;
             return mapCell;
         }
 
@@ -220,7 +227,9 @@ namespace IsoTileEngine
         {
             Point localPoint;
             Point mapPoint = WorldToMapCell(worldPoint, out localPoint);
-            int slope = Rows[mapPoint.Y].Columns[mapPoint.X].SlopeMap;
+            int slope = -1;
+            if(mapPoint.X >= 0 && mapPoint.X <= MapWidth && mapPoint.Y >= 0 && mapPoint.Y <= MapHeight)
+                slope = Rows[mapPoint.Y].Columns[mapPoint.X].SlopeMap;
 
             return GetSlopeMapHeight(localPoint, slope);
         }
@@ -233,7 +242,9 @@ namespace IsoTileEngine
         public int GetOverallHeight(Point worldPoint)
         {
             Point mapCellPoint = WorldToMapCell(worldPoint);
-            int height = Rows[mapCellPoint.Y].Columns[mapCellPoint.X].HeightTiles.Count * Tile.HeightTileOffset;
+            int height = 0;
+            if(mapCellPoint.X >= 0 && mapCellPoint.X <= MapWidth && mapCellPoint.Y >= 0 && mapCellPoint.Y <= MapHeight)
+                height = Rows[mapCellPoint.Y].Columns[mapCellPoint.X].HeightTiles.Count * Tile.HeightTileOffset;
             height += GetSlopeHeightAtWorldPoint(worldPoint);
             return height;
         }

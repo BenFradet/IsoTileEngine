@@ -119,6 +119,10 @@ namespace IsoTileEngine.Sprites
             {
                 lastPosition = position;
                 position = value;
+                if (position.X < 0)
+                    position.X = 0;
+                if (position.Y < 0)
+                    position.Y = 0;
                 UpdateRotation();
             }
         }
