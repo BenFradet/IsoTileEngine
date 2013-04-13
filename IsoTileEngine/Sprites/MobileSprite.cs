@@ -29,7 +29,7 @@ namespace IsoTileEngine.Sprites
         #region Methods
         public void Update(GameTime gameTime)
         {
-            if (path.Count > 0 && map.GetCellAtWorldPoint(currentTarget) != map.GetCellAtWorldPoint(Position))
+            if (path.Count > 0 && currentTarget != Position)
             {
                 currentTarget = path.Dequeue();
             }
