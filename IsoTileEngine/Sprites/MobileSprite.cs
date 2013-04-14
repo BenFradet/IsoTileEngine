@@ -15,6 +15,7 @@ namespace IsoTileEngine.Sprites
         Vector2 currentTarget;
         Vector2 nullTarget;
         float speed = 3.0f;
+        bool pathing = false;
 
         #region Constructors
         public MobileSprite(Texture2D texture, TileMap map)
@@ -33,14 +34,43 @@ namespace IsoTileEngine.Sprites
             if (path.Count > 0 && currentTarget != Position)
             {
                 currentTarget = path.Dequeue();
+                pathing = true;
             }
-            else if (map.GetCellAtWorldPoint(currentTarget) != map.GetCellAtWorldPoint(Position) && currentTarget != nullTarget)
+            else if (map.GetCellAtWorldPoint(currentTarget) == map.GetCellAtWorldPoint(Position))
+                pathing = false;
+            else if (map.GetCellAtWorldPoint(currentTarget) != map.GetCellAtWorldPoint(Position) && currentTarget != nullTarget && pathing)
             {
                 Vector2 move = FindBestMove(GetPossibleMoves(Position));
+                string animation = "walk";
+                if (move.X != 0)
+                {
+                    if (move.X > 0)
+                        animation += "East";
+                    else
+                        animation += "West";
+                    if (move.Y != 0)
+                    {
+                        if (move.Y > 0)
+                            animation += "South";
+                        else
+                            animation += "North";
+                    }
+                }
+                else
+                {
+                    if (move.Y > 0)
+                        animation += "South";
+                    else
+                        animation += "North";
+                }
                 move.Normalize();
                 move *= speed;
                 Position += move;
+                if (sprite.CurrentAnimation != animation)
+                    sprite.CurrentAnimation = animation;
             }
+            else if (path.Count == 0 && !sprite.IsAnimating)
+                sprite.CurrentAnimation = "idle" + sprite.CurrentAnimation.Substring(4);
 
             sprite.Update(gameTime);
         }
