@@ -65,9 +65,12 @@ namespace IsoTileEngine.Sprites
                 }
                 move.Normalize();
                 move *= speed;
-                Position += move;
-                if (sprite.CurrentAnimation != animation)
-                    sprite.CurrentAnimation = animation;
+                if (move.Length() != 0)
+                {
+                    sprite.Move((int)move.X, (int)move.Y);
+                    if (sprite.CurrentAnimation != animation)
+                        sprite.CurrentAnimation = animation;
+                }
             }
             else if (path.Count == 0 && !sprite.IsAnimating)
                 sprite.CurrentAnimation = "idle" + sprite.CurrentAnimation.Substring(4);
@@ -178,6 +181,11 @@ namespace IsoTileEngine.Sprites
                 else
                     speed = value;
             }
+        }
+
+        public bool IsPathing
+        {
+            get { return pathing; }
         }
 
         /*public int HorizontalCollisionBuffer

@@ -116,7 +116,6 @@ namespace IsoTileEngine
             currentKeyboardState = Keyboard.GetState();
             currentMouseState = Mouse.GetState();
 
-            Vector2 moveVector = Vector2.Zero;
             Vector2 moveDir = Vector2.Zero;
             string animation = "";
 
@@ -124,49 +123,41 @@ namespace IsoTileEngine
             {
                 moveDir = new Vector2(-2, -1);
                 animation = "walkNorthWest";
-                moveVector += new Vector2(-2, -1);
             }
             else if (currentKeyboardState.IsKeyDown(Keys.Z))
             {
                 moveDir = new Vector2(0, -1);
                 animation = "walkNorth";
-                moveVector += new Vector2(0, -1);
             }
             else if (currentKeyboardState.IsKeyDown(Keys.E))
             {
                 moveDir = new Vector2(2, -1);
                 animation = "walkNorthEast";
-                moveVector += new Vector2(2, -1);
             }
             else if (currentKeyboardState.IsKeyDown(Keys.Q))
             {
                 moveDir = new Vector2(-2, 0);
                 animation = "walkWest";
-                moveVector += new Vector2(-2, 0);
             }
             else if (currentKeyboardState.IsKeyDown(Keys.D))
             {
                 moveDir = new Vector2(2, 0);
                 animation = "walkEast";
-                moveVector += new Vector2(2, 0);
             }
             else if (currentKeyboardState.IsKeyDown(Keys.W))
             {
                 moveDir = new Vector2(-2, 1);
                 animation = "walkSouthWest";
-                moveVector += new Vector2(-2, 1);
             }
             else if (currentKeyboardState.IsKeyDown(Keys.S))
             {
                 moveDir = new Vector2(0, 1);
                 animation = "walkSouth";
-                moveVector += new Vector2(0, 1);
             }
             else if (currentKeyboardState.IsKeyDown(Keys.X))
             {
                 moveDir = new Vector2(2, 1);
                 animation = "walkSouthEast";
-                moveVector += new Vector2(2, 1);
             }
 
             if (!map.GetCellAtWorldPoint(player.Position + moveDir).Walkable)
@@ -181,7 +172,7 @@ namespace IsoTileEngine
                 if (player.Sprite.CurrentAnimation != animation)
                     player.Sprite.CurrentAnimation = animation;
             }
-            else
+            else if(!player.IsPathing)
                 player.Sprite.CurrentAnimation = "idle" + player.Sprite.CurrentAnimation.Substring(4);
 
             float playerX = MathHelper.Clamp(player.Position.X, player.Sprite.DrawOffset.X, Camera.WorldWidth);
@@ -203,7 +194,7 @@ namespace IsoTileEngine
             if (currentKeyboardState.IsKeyDown(Keys.C) && !previousKeyboardState.IsKeyDown(Keys.C))
                 coordinates = !coordinates;
 
-            if (currentMouseState.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released)
+            if (currentMouseState.LeftButton == ButtonState.Released && previousMouseState.LeftButton == ButtonState.Pressed)
                 player.AddPathNode(Camera.ScreenToWorld(new Vector2((int)currentMouseState.X, (int)currentMouseState.Y)));
 
             UpdateFogOfWar();
@@ -359,7 +350,7 @@ namespace IsoTileEngine
                 new Rectangle(0, 0, Tile.TileStepX, Tile.HeightTileOffset), 
                 Color.White, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
 
-            spriteBatch.DrawString(pericles15, "x = " + a + "; y = " + b, Vector2.Zero, Color.White);
+            spriteBatch.DrawString(pericles15, "x = " + a + "; y = " + b + "; " + player.Sprite.CurrentFrameAnimation.CurrentFrame, Vector2.Zero, Color.White);
 
             spriteBatch.End();
 
